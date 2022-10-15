@@ -36,7 +36,6 @@ abstract class ItemEntity(
     val duration: Duration = Duration.ZERO,
     val target: ItemTarget = ItemTarget.Self
 ) {
-
     /**道具使用对象*/
     enum class ItemTarget(code:Int){
         None(0),

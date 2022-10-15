@@ -7,6 +7,7 @@ import net.mamoe.mirai.Bot
 import net.mamoe.mirai.console.extension.PluginComponentStorage
 import net.mamoe.mirai.console.plugin.jvm.JvmPluginDescription
 import net.mamoe.mirai.console.plugin.jvm.KotlinPlugin
+import net.mamoe.mirai.console.plugin.version
 import net.mamoe.mirai.contact.Group
 import net.mamoe.mirai.contact.MemberPermission
 import net.mamoe.mirai.contact.nameCardOrNick
@@ -38,7 +39,7 @@ object GroupmanagerHz : KotlinPlugin(
     JvmPluginDescription(
         id = "org.hezistudio.groupmanager-hz",
         name = "我的群管插件",
-        version = "0.1.0",
+        version = "0.0.5",
     ) {
         author("HeziBlack")
     }

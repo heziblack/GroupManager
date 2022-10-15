@@ -34,7 +34,7 @@ object BiliVideoPhase:SimpleListenerHost() {
             if (previewURL!=null){
                 // 根据URL 实例， 获取HttpURLConnection 实例
                 val url = URL( "http://" + previewURL )
-                println(url)
+//                println(url)
                 val httpURLConnection: HttpURLConnection = url.openConnection() as HttpURLConnection
                 // 设置读取 和 连接 time out 时间
                 httpURLConnection.readTimeout = 2000

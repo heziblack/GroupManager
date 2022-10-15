@@ -5,6 +5,7 @@ import net.mamoe.mirai.event.EventHandler
 import net.mamoe.mirai.event.ListenerHost
 import net.mamoe.mirai.event.events.GroupMessageEvent
 import net.mamoe.mirai.message.data.content
+import org.hezistudio.GroupmanagerHz
 import org.hezistudio.klaxonModels.ApexInfo
 import org.hezistudio.klaxonModels.ApexInfoGetter
 import java.lang.Exception
@@ -38,20 +39,17 @@ object ListenerOfApexSearch:ListenerHost {
         try {
             getter.run()
         }catch (e:Exception){
-            println(e.message)
+            GroupmanagerHz.logger.error(e.message)
             return null
         }
         if (getter.hasResult){
             return try {
-                println("T")
                 val gson = Gson()
                 gson.fromJson(getter.result, ApexInfo::class.java)
             } catch (e: Exception) {
-                println("E")
                 null
             }
         }
-        println("N")
         return null
     }
 
