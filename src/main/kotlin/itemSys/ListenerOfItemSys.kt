@@ -106,7 +106,10 @@ object ListenerOfItemSys:ListenerHost {
                     return
                 }
                 val itemPrice = itemEntity.inPrice
-                if (dbUser.fraction >= itemPrice){
+                if (itemPrice == 0){
+                    DBTools.insertMemberItem(db, dbItem, dbUser)
+                    e.group.sendMessage("购买成功，花费${itemPrice}")
+                } else if (dbUser.fraction >= itemPrice){
                     DBTools.insertMemberItem(db, dbItem, dbUser)
                     DBTools.memberCost(db,itemPrice,dbUser)
                     e.group.sendMessage("购买成功，花费${itemPrice}")
@@ -185,11 +188,13 @@ object ListenerOfItemSys:ListenerHost {
     private fun itemStore():String{
         val strBuilder = StringBuilder("======道具商店======")
         strBuilder.append("\n       道具名          价格")
-        for(item in BuildInItemList){
+        val sortedItems = BuildInItemList.sortByPrice()
+        for(item in sortedItems){
             if (item.canBuy){
                 val lOfItemName = item.name.length * 2
                 val lOfItemPrice = when(item.inPrice){
-                    in (0..9) -> 1
+                    0 -> 4
+                    in (1..9) -> 1
                     in (10..99) -> 2
                     in (100..999) -> 3
                     in (1000..9999) -> 4
@@ -209,7 +214,11 @@ object ListenerOfItemSys:ListenerHost {
                     for (i in (1..midSpace)){
                         strBuilder.append(" ")
                     }
-                    strBuilder.append(item.inPrice)
+                    if (item.inPrice == 0){
+                        strBuilder.append("免费")
+                    }else{
+                        strBuilder.append(item.inPrice)
+                    }
                 }
             }
         }

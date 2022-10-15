@@ -1,9 +1,6 @@
 package org.hezistudio.itemSys
 
-import org.hezistudio.itemSys.buildInItems.MuteDrag
-import org.hezistudio.itemSys.buildInItems.RenameCard
-import org.hezistudio.itemSys.buildInItems.SexualConversionDrug
-import org.hezistudio.itemSys.buildInItems.StrengthDrug
+import org.hezistudio.itemSys.buildInItems.*
 
 object BuildInItemList: ArrayList<ItemEntity>() {
     init {
@@ -11,6 +8,7 @@ object BuildInItemList: ArrayList<ItemEntity>() {
         this.add(MuteDrag)
         this.add(StrengthDrug)
         this.add(SexualConversionDrug)
+        this.add(FallenPotion)
     }
 
     fun get(itemName:String):ItemEntity?{
@@ -31,4 +29,24 @@ object BuildInItemList: ArrayList<ItemEntity>() {
             return list
         }
 
+    /**道具按价格升序*/
+    fun sortByPrice():ArrayList<ItemEntity>{
+        val out:ArrayList<ItemEntity> = arrayListOf()
+        val tempList:ArrayList<ItemEntity> = arrayListOf()
+        tempList.addAll(this)
+        while (tempList.isNotEmpty()){
+            var temp = tempList.first()
+            for (tl in tempList){
+                if (tl == tempList.first()){
+                    continue
+                }
+                if (tl.inPrice < temp.inPrice){
+                    temp = tl
+                }
+            }
+            out.add(temp)
+            tempList.remove(temp)
+        }
+        return out
+    }
 }

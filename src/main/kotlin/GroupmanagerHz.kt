@@ -69,7 +69,7 @@ object GroupmanagerHz : KotlinPlugin(
         pluginConfig = loadConfig() // 加载配置
         messageModel = loadMessageModel() // 加载消息模板
         groupID = pluginConfig.group // 读取群id
-        cycleTimer() // 循环计时器
+//        cycleTimer() // 循环计时器
 
         // 指定群聊消息
         val channel = globalEventChannel().filter {
