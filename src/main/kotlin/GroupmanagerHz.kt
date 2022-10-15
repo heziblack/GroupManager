@@ -277,9 +277,10 @@ object GroupmanagerHz : KotlinPlugin(
 
         // 监视群成员变化
         globalEventChannel().filter {
-            it is MemberJoinEvent && it.groupId == pluginConfig.group
-                    || it is MemberLeaveEvent && it.groupId == pluginConfig.group
-                    || it is BotJoinGroupEvent && it.groupId == pluginConfig.group
+            val t1 = it is MemberJoinEvent && it.groupId == pluginConfig.group
+            val t2 = it is MemberLeaveEvent && it.groupId == pluginConfig.group
+            val t3 = it is BotJoinGroupEvent && it.groupId == pluginConfig.group
+            t1 || t2 || t3
         }.registerListenerHost(TargetGroupListener)
 
         // 测试

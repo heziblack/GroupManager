@@ -1,10 +1,13 @@
 package org.hezistudio.dataBase
 
+import net.mamoe.mirai.contact.nameCardOrNick
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.hezistudio.GroupmanagerHz
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.and
+import org.jetbrains.exposed.sql.name
+import org.jetbrains.exposed.sql.select
 
 object DBTools {
 
@@ -93,4 +96,46 @@ object DBTools {
     fun memberAdd(db:Database,fraction: Int,mem: Member){
         memberCost(db,-fraction,mem)
     }
+/**尝试添加新成员*/
+    fun addGroupMember(db: Database, mem:net.mamoe.mirai.contact.Member){
+        println(db.name+"添加成员")
+        transaction {
+            val q0 = Groups.select(Groups.number eq mem.group.id)
+            val gid = if (q0.empty()){
+                val g = Group.new {
+                    number = mem.group.id
+                    isWorking = true
+                }
+                g.id
+            }else{
+                q0.first()[Groups.id]
+            }
+            val q1 = Users.select(Users.userNum eq mem.id)
+            val uid = if (q1.empty()){
+                val u = User.new {
+                    userNum = mem.id
+                }
+                u.id
+            }else{
+                q1.first()[Users.id]
+            }
+            val q2 = GroupMembers.innerJoin(Groups).innerJoin(Users).select {
+                (Users.userNum eq mem.id) and (Groups.number eq mem.group.id)
+            }
+            if (q2.empty()){
+                Member.new {
+                    member = User[uid]
+                    group = Group(gid)
+                    nickName = mem.nameCardOrNick
+                    gender = true
+                    health = 100.0
+                    fraction = 0
+                    attack = 10.0
+                    strength = 10.0
+                    defence = 10.0
+                }
+            }
+        }
+    }
+
 }

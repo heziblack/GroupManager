@@ -205,8 +205,9 @@ object ListenerOfItemSys:ListenerHost {
                     strBuilder.append("\n${item.name} ${item.inPrice}")
                 }else{
                     strBuilder.append("\n")
-                    val midSpace = space / 2
                     val startSpace = (20 - lOfItemName) / 2
+                    val midSpace2 = (10 - lOfItemPrice) / 2 + (10 - lOfItemPrice) % 2
+                    val midSpace = startSpace + midSpace2
                     for (i in (1..startSpace)){
                         strBuilder.append(" ")
                     }
