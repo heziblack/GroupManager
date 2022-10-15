@@ -27,12 +27,15 @@ import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.neq
 import org.jetbrains.exposed.sql.transactions.transaction
+import java.awt.image.BufferedImage
 import java.io.File
+import java.io.InputStream
 import java.time.Duration
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import java.util.concurrent.Executors
+import javax.imageio.ImageIO
 import kotlin.math.absoluteValue
 
 object GroupmanagerHz : KotlinPlugin(
@@ -568,14 +571,14 @@ object GroupmanagerHz : KotlinPlugin(
     }
 
     /**获取今日时间戳*/
-    private fun todayStamp():Long{
+    fun todayStamp():Long{
         val currentTime = LocalDateTime.now()
         val fmt = DateTimeFormatter.ofPattern("yyMMddHHmm")
         return currentTime.format(fmt).toLong()
     }
 
     /**获取今日时间线*/
-    private fun todayLine():Long{
+    fun todayLine():Long{
         val currentTime = LocalDateTime.now()
         val fmt = DateTimeFormatter.ofPattern("yyMMdd0000")
         return currentTime.format(fmt).toLong()
@@ -772,4 +775,9 @@ object GroupmanagerHz : KotlinPlugin(
         val dateTime = LocalDateTime.now()
         return dateTime.hour in (5..22)
     }
+    /***/
+    fun getImageResStream(path:String):InputStream?{
+        return getResourceAsStream(path)
+    }
+
 }
