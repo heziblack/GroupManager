@@ -86,17 +86,7 @@ object GroupmanagerHz : KotlinPlugin(
         }.subscribeAlways<GroupMessageEvent> { signIn(sender) }
 
         // 查询积分
-        channel.filter { it is GroupMessageEvent && (it.message.content == "查询积分"||it.message.content == "积分查询") }.subscribe<GroupMessageEvent> {
-                getDBC(bot.id)
-                var fraction = 0
-                transaction {
-                    val groupMember = getDBMember(db,sender.id)
-                    val mem = groupMember?:return@transaction
-                    fraction = mem.fraction
-                }
-                group.sendMessage("您当前的积分为：$fraction")
-                ListeningStatus.LISTENING
-            }
+        channel.registerListenerHost(StatuesListener)
 
         // 狐狸要的击剑功能：随机击剑
         channel.filter { it is GroupMessageEvent && it.message.content == "我要击剑" }.subscribe<GroupMessageEvent> {
