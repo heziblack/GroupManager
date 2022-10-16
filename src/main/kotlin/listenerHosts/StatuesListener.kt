@@ -76,19 +76,24 @@ object StatuesListener:ListenerHost {
         val img = ImageIO.read(imgStream)
         imgStream.close()
         val g2d = img.createGraphics()
-//        g2d.fontMetrics
-        g2d.font = Font("楷体",Font.PLAIN,36)
-        g2d.color = Color.BLACK
-//        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,RenderingHints.VALUE_ANTIALIAS_ON)
         g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,RenderingHints.VALUE_TEXT_ANTIALIAS_ON)
+        // 写玩家昵称
+        val fontForNick = Font("华文新魏", Font.PLAIN,72)
+        val normalFontColor = Color(55,30,30)
+        g2d.font = fontForNick
+        g2d.color= Color.WHITE
+        g2d.drawString(dbMember.nickName,41,72+28)
 
-        g2d.drawString(dbMember.nickName,200,98)
-        val gender = if(dbMember.gender) "男" else "女"
-        g2d.drawString(gender,200,170)
-        g2d.drawString("${dbMember.fraction}",200,250)
-        g2d.drawString("${dbMember.attack}",200,330)
-        g2d.drawString("${dbMember.defence}",200,400)
-        g2d.drawString("${dbMember.strength}",200,480)
+        // 写玩家积分等数字
+        g2d.font = Font("华文隶书",Font.PLAIN,36)
+        g2d.color = normalFontColor
+        var ah = g2d.fontMetrics.ascent
+        g2d.drawString("${dbMember.fraction}",140,154+ah)
+        g2d.drawString("${dbMember.attack}",144,418+ah)
+        g2d.drawString("${dbMember.defence}",144,460+ah)
+        g2d.drawString("${dbMember.strength}",144,502+ah)
+//        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,RenderingHints.VALUE_ANTIALIAS_ON)
+        // 签到信息
         val signIn = transaction {
             val q1 = MemberSignIn.find { MemberSignIns.member eq dbMember.id }
             if (q1.empty()){
@@ -104,6 +109,7 @@ object StatuesListener:ListenerHost {
             }
         }
 
+        // 击剑信息
         val jijianCounter = transaction {
             val q = Jijian.find(JiJians.member eq dbMember.id)
             if (q.empty()){
@@ -118,12 +124,32 @@ object StatuesListener:ListenerHost {
                 }
             }
         }
-        g2d.drawString("$jijianCounter",750,100)
+
+        // 写击剑信息
+        g2d.drawString("$jijianCounter",770,330+ah)
+
+        // 写签到信息
         if (signIn==null){
-            g2d.drawString("今日未签到",600,500)
+            g2d.font = Font("华文行楷",Font.PLAIN,60)
+            g2d.color = Color(201,39,39)
+            ah = g2d.fontMetrics.ascent
+            g2d.drawString("今日未签到",621,452+ah)
         }else{
-            g2d.drawString("$signIn",600,500)
+            g2d.font = Font("Bradley Hand ITC",Font.PLAIN,60)
+            g2d.color = Color(201,39,39)
+            ah = g2d.fontMetrics.ascent
+            g2d.drawString("$signIn",595,446+ah)
         }
+
+        // 写玩家性别
+        val gender = if(dbMember.gender) "♂" else "♀"
+        g2d.font = Font("华文彩云",Font.PLAIN,32)
+        g2d.color = if(dbMember.gender)
+            Color(0,255,255)
+        else
+            Color(255,91,130)
+        ah = g2d.fontMetrics.ascent
+        g2d.drawString(gender,48,105+ah)
         g2d.dispose()
         return img
     }
