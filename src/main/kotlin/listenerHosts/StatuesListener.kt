@@ -15,6 +15,7 @@ import org.jetbrains.exposed.sql.transactions.transaction
 import java.awt.Color
 import java.awt.Font
 import java.awt.RenderingHints
+import java.awt.geom.RoundRectangle2D
 import java.awt.image.BufferedImage
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
@@ -77,6 +78,8 @@ object StatuesListener:ListenerHost {
         imgStream.close()
         val g2d = img.createGraphics()
         g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,RenderingHints.VALUE_TEXT_ANTIALIAS_ON)
+        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,RenderingHints.VALUE_ANTIALIAS_ON)
+
         // 写玩家昵称
         val fontForNick = Font("华文新魏", Font.PLAIN,72)
         val normalFontColor = Color(55,30,30)
@@ -84,7 +87,34 @@ object StatuesListener:ListenerHost {
         g2d.color= Color.WHITE
         g2d.drawString(dbMember.nickName,41,72+28)
 
-        // 写玩家积分等数字
+        val ppt:List<Double> = listOf(dbMember.attack,dbMember.defence,dbMember.strength)
+        val biggest = biggestDoubleAt(ppt)
+        val commonX = 140.0
+        val startY = 420.0
+        val testW = 200.0
+
+        val rrtg:List<Pair<Double,Double>> = listOf(
+            Pair(startY,testW),
+            Pair(startY+42.0,testW),
+            Pair(startY+83.0,testW),
+        )
+
+        g2d.color = Color.LIGHT_GRAY
+        for (i in rrtg){
+            val g = generateRoundRectangle(commonX,i.first,i.second)
+            g2d.fill(g)
+        }
+        // 绘制进度条
+        if(biggest<100.0 && biggest > 10.0){
+
+        }else{
+
+        }
+//        val roundRectangle = generateRoundRectangle()
+//        g2d.draw(roundRectangle)
+//        g2d.fill(roundRectangle)
+
+        // 写玩家积分等
         g2d.font = Font("华文隶书",Font.PLAIN,36)
         g2d.color = normalFontColor
         var ah = g2d.fontMetrics.ascent
@@ -129,14 +159,13 @@ object StatuesListener:ListenerHost {
         g2d.drawString("$jijianCounter",770,330+ah)
 
         // 写签到信息
+        g2d.color = Color(201,39,39)
         if (signIn==null){
             g2d.font = Font("华文行楷",Font.PLAIN,60)
-            g2d.color = Color(201,39,39)
             ah = g2d.fontMetrics.ascent
             g2d.drawString("今日未签到",621,452+ah)
         }else{
             g2d.font = Font("Bradley Hand ITC",Font.PLAIN,60)
-            g2d.color = Color(201,39,39)
             ah = g2d.fontMetrics.ascent
             g2d.drawString("$signIn",595,446+ah)
         }
@@ -153,7 +182,19 @@ object StatuesListener:ListenerHost {
         g2d.dispose()
         return img
     }
+    /**生成指定宽度的圆角矩形*/
+    private fun generateRoundRectangle(x:Double, y:Double, w:Double):RoundRectangle2D.Double{
+        return RoundRectangle2D.Double(x,y,w,35.0,35.0,35.0)
+    }
 
-
+    private fun biggestDoubleAt(list: List<Double>):Int{
+        var idx = 0
+        for (index in list.indices){
+            if (list[index]>list[idx]){
+                idx = index
+            }
+        }
+        return idx
+    }
 
 }

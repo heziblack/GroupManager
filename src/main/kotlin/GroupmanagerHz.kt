@@ -23,6 +23,7 @@ import org.hezistudio.itemSys.ListenerOfItemSys
 import org.hezistudio.itemSys.ListenerForItemDescription
 import org.hezistudio.klaxonModels.MessageModel
 import org.hezistudio.listenerHosts.*
+import org.hezistudio.stockSys.StockListener
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.neq
@@ -134,6 +135,8 @@ object GroupmanagerHz : KotlinPlugin(
             }
             group.sendMessage(msgBuilder.build())
         }
+        // 股票系统
+        channel.registerListenerHost(StockListener)
 
         // 排行榜
         channel.filter {
@@ -733,7 +736,23 @@ object GroupmanagerHz : KotlinPlugin(
                 }
                 jijian.counter = 10
                 challenger.fraction += frac
-                msg.add("你一共进行了${winC+loseC+drawC}场比试，战绩${winC}胜${loseC}负${drawC}平，获得积分${frac}点")
+                val giftNum = 0.01 * left
+                val giftName = when((0..2).random()){
+                    0-> {
+                        challenger.attack += giftNum
+                        "攻击力"
+                    }
+                    1-> {
+                        challenger.defence += giftNum
+                        "防御力"
+                    }
+                    2-> {
+                        challenger.strength += giftNum
+                        "体力"
+                    }
+                    else -> {""}
+                }
+                msg.add("你一共进行了${winC+loseC+drawC}场比试，战绩${winC}胜${loseC}负${drawC}平，获得积分${frac}点，获得${giftNum}点${giftName}增长")
             }
         }
         return msg.build()

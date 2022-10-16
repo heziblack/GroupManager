@@ -3,11 +3,8 @@ package org.hezistudio.dataBase
 import net.mamoe.mirai.contact.nameCardOrNick
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.hezistudio.GroupmanagerHz
-import org.jetbrains.exposed.sql.Database
+import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
-import org.jetbrains.exposed.sql.and
-import org.jetbrains.exposed.sql.name
-import org.jetbrains.exposed.sql.select
 
 object DBTools {
 
@@ -136,6 +133,133 @@ object DBTools {
                 }
             }
         }
+    }
+
+    fun memberBuyStock(db: Database,mem: net.mamoe.mirai.contact.Member,stockId:Int,num:Int):Boolean{
+        val dbMember = getMember(db,mem.id,mem.group.id)?:return false
+        transaction {
+            SchemaUtils.create(MemberStocks)
+            MemberStocks.insert {
+                it[stId] = stockId
+                it[memId] = dbMember.id
+                it[hold] = num
+                it[ts] = GroupmanagerHz.todayStamp()
+            }
+        }
+        return true
+    }
+
+    fun memberSellStock(db: Database,mem: net.mamoe.mirai.contact.Member,stockId:Int,num:Int):Boolean{
+        val dbMember = getMember(db,mem.id,mem.group.id)?:return false
+        return transaction {
+            SchemaUtils.create(MemberStocks)
+            val q = MemberStocks.select {
+                val a = MemberStocks.stId eq stockId
+                val b = MemberStocks.memId eq dbMember.id
+                a and b
+            }
+            if (q.empty()) return@transaction false
+            val rowList = q.toList()
+            var allCanSell = 0
+            val tdl = GroupmanagerHz.todayLine()
+            q.forEach {
+                if (it[MemberStocks.ts] < tdl){
+                    allCanSell += it[MemberStocks.hold]
+                }
+            }
+            if (allCanSell<num) return@transaction false
+            val soldID:ArrayList<Long> = arrayListOf()
+            var rest = num
+            rowList.forEach {
+                if (it[MemberStocks.ts] < tdl){
+                    if (rest >= it[MemberStocks.hold]){
+                        rest -= it[MemberStocks.hold]
+                        soldID.add(it[MemberStocks.id].value)
+                    }
+                }
+            }
+            for (i in soldID){
+                deleteMemberStock(db,i)
+            }
+            if (rest>0){
+                val q2 = MemberStocks.select {
+                    val a = MemberStocks.stId eq stockId
+                    val b = MemberStocks.memId eq dbMember.id
+                    val c = MemberStocks.ts less tdl
+                    a and b and c
+                }
+                q2.forEach{
+                    if (rest > 0 && it[MemberStocks.hold] >= rest){
+                        val holds = it[MemberStocks.hold]
+                        val msId = it[MemberStocks.id]
+                        if (holds>rest){
+                            updateMemberStock(db,msId.value,holds - rest)
+                        }else{
+                            deleteMemberStock(db,msId.value)
+                        }
+                        rest = 0
+                    }
+                }
+            }
+            true
+        }
+    }
+
+    private fun deleteMemberStock(db:Database,id:Long){
+        transaction {
+            MemberStocks.deleteWhere{
+                MemberStocks.id eq id
+            }
+        }
+    }
+
+    private fun updateMemberStock(db:Database,id:Long, nV:Int){
+        transaction {
+            MemberStocks.update({ MemberStocks.id eq id }){
+                it[hold] = nV
+            }
+        }
+    }
+
+    fun canSellStock(db:Database, sId:Int, dbMember:Member):Int{
+        var canSell = 0
+        transaction {
+            MemberStocks.select {
+                val a = MemberStocks.stId eq sId
+                val b = MemberStocks.memId eq dbMember.id
+                val c = MemberStocks.ts less GroupmanagerHz.todayLine()
+                a and b and c
+            }.forEach {
+                canSell += it[MemberStocks.hold]
+            }
+        }
+        return canSell
+    }
+
+    fun memberStockHold(db:Database, stockId: Int, dbMember: Member):ArrayList<Int>{
+        val list:ArrayList<Int> = arrayListOf()
+        //持仓 可出售 不可出售
+        transaction {
+            val all = MemberStocks.select {
+                val a = MemberStocks.stId eq stockId
+                val b = MemberStocks.memId eq dbMember.id
+                a and b
+            }
+            var allHold = 0
+            var canSell = 0
+            var cannotSell = 0
+            val tdl = GroupmanagerHz.todayLine()
+            all.forEach {
+                allHold += it[MemberStocks.hold]
+                if (it[MemberStocks.ts]<tdl){
+                    canSell += it[MemberStocks.hold]
+                }else{
+                    cannotSell += it[MemberStocks.hold]
+                }
+            }
+            list.addAll(arrayListOf<Int>(allHold,canSell,cannotSell))
+        }
+        return list
     }
 
 }

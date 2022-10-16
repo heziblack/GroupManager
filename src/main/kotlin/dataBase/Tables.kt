@@ -109,3 +109,10 @@ object MemberMutes:IntIdTable(){
     val member = reference("member_id",GroupMembers)
     val endTime = long("end_time")
 }
+
+object MemberStocks:LongIdTable(){
+    val stId = integer("st_id")
+    val memId = reference("mem_id",GroupMembers)
+    val hold = integer("hold_value")
+    val ts = long("time_stamp")
+}
