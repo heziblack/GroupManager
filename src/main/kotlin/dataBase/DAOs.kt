@@ -61,11 +61,11 @@ class Member(id: EntityID<Int>):IntEntity(id){
     var group by Group referencedOn GroupMembers.group
     var nickName by GroupMembers.nickName
     var gender by GroupMembers.gender.default(true)
-    var health by GroupMembers.health
-    var fraction by GroupMembers.fraction
-    var strength by GroupMembers.strength
-    var attack by GroupMembers.attack
-    var defence by GroupMembers.defence
+    var health by GroupMembers.health.default(10.0)
+    var fraction by GroupMembers.fraction.default(0)
+    var strength by GroupMembers.strength.default(10.0)
+    var attack by GroupMembers.attack.default(10.0)
+    var defence by GroupMembers.defence.default(10.0)
 }
 
 /**成员-蓝图*/
@@ -118,4 +118,11 @@ class ScheduleMember(id:EntityID<Long>):LongEntity(id){
     companion object:LongEntityClass<ScheduleMember>(ScheduleMembers)
     var schedule by GameSchedule referencedOn ScheduleMembers.schedule
     var member by Member referencedOn ScheduleMembers.member
+}
+
+class MemberFishing(id:EntityID<Int>):IntEntity(id){
+    companion object:IntEntityClass<MemberFishing>(MemberFishings)
+    var memId by MemberFishings.memId
+    var rodState by MemberFishings.rodState.default(false)
+    var targetTime by MemberFishings.targetTime.default(0)
 }

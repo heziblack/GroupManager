@@ -116,3 +116,10 @@ object MemberStocks:LongIdTable(){
     val hold = integer("hold_value")
     val ts = long("time_stamp")
 }
+
+/**@property targetTime 目标起竿时间*/
+object MemberFishings:IntIdTable(){
+    val memId = integer("mem_id")
+    val rodState = bool("rod_state")
+    val targetTime = long("target_time")
+}

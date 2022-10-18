@@ -282,6 +282,9 @@ object GroupmanagerHz : KotlinPlugin(
             starts
         }.registerListenerHost(ListenerOfApexSearch)
 
+        // 钓鱼系统
+        channel.registerListenerHost(FishingSys)
+
         // 监视群成员变化
         globalEventChannel().filter {
             val t1 = it is MemberJoinEvent && it.groupId == pluginConfig.group
@@ -379,7 +382,7 @@ object GroupmanagerHz : KotlinPlugin(
                 BlueMaps, BlueMapInputItems, BlueMapOutputItems,
                 GroupMembers, GroupMemberBlueMaps, MemberItems,
                 MemberSignIns, JiJians, ScheduleMembers,
-                GameSchedules,MemberMutes
+                GameSchedules,MemberMutes,MemberFishings
             )
         }
     }

@@ -37,6 +37,39 @@ object DBTools {
         }
     }
 
+    fun getMemberOrCreate(db: Database,mem:net.mamoe.mirai.contact.Member):Member{
+        val dbMember = getMember(db,mem.id,mem.group.id)
+        if (dbMember!=null){
+            return dbMember
+        }else{
+            return transaction {
+                val uq = User.find(Users.userNum eq mem.id)
+                val user = if (uq.empty()){
+                    User.new {
+                        userNum = mem.id
+                    }
+                }else{
+                    uq.first()
+                }
+                val gq = Group.find(Groups.number eq mem.group.id)
+                val group = if (gq.empty()){
+                    Group.new {
+                        number = mem.group.id
+                        isWorking = true
+                    }
+                }else{
+                    gq.first()
+                }
+                Member.new {
+                    nickName = mem.nameCardOrNick
+                    member = user
+                    this.group = group
+                }
+            }
+        }
+
+    }
+
     /**获取数据库道具对象*/
     fun getItem(db: Database, itemName:String):Item?{
         return transaction {
