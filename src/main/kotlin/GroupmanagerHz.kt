@@ -54,7 +54,7 @@ object GroupmanagerHz : KotlinPlugin(
         Schedule.clear()
     }
 
-    private fun cycleClear(cycleTime:Long = 24*60*60*1000){
+    private fun cycleClear(cycleTime:Long = 24L*60*60*1000){
         scheduler.submit {
             GroupmanagerHz.launch {
                 delay(cycleTime)

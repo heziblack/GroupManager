@@ -87,32 +87,23 @@ object StatuesListener:ListenerHost {
         g2d.color= Color.WHITE
         g2d.drawString(dbMember.nickName,41,72+28)
 
-        val ppt:List<Double> = listOf(dbMember.attack,dbMember.defence,dbMember.strength)
-        val biggest = biggestDoubleAt(ppt)
         val commonX = 140.0
-        val startY = 420.0
-        val testW = 200.0
-
-        val rrtg:List<Pair<Double,Double>> = listOf(
-            Pair(startY,testW),
-            Pair(startY+42.0,testW),
-            Pair(startY+83.0,testW),
-        )
-
+        /**圆角矩形生成数据
+         * 1-垂直位置
+         * 2-宽度 */
+        val rrtg:List<Pair<Double,Double>> = prepareProgressBar(dbMember)
         g2d.color = Color.LIGHT_GRAY
-        for (i in rrtg){
-            val g = generateRoundRectangle(commonX,i.first,i.second)
-            g2d.fill(g)
+        val colorsForPB:List<Color> = listOf(
+            Color(255,0,0), Color(0,0,255),Color(0,255,0)
+        )
+        for ((idx,i) in rrtg.withIndex()){
+            if (i.second!=0.0){
+                g2d.color = colorsForPB[idx]
+                val g = generateRoundRectangle(commonX,i.first,i.second)
+                g2d.fill(g)
+            }
         }
         // 绘制进度条
-        if(biggest<100.0 && biggest > 10.0){
-
-        }else{
-
-        }
-//        val roundRectangle = generateRoundRectangle()
-//        g2d.draw(roundRectangle)
-//        g2d.fill(roundRectangle)
 
         // 写玩家积分等
         g2d.font = Font("华文隶书",Font.PLAIN,36)
@@ -197,4 +188,35 @@ object StatuesListener:ListenerHost {
         return idx
     }
 
+
+    private fun prepareProgressBar(dbMember: org.hezistudio.dataBase.Member):List<Pair<Double,Double>>{
+        val origin:List<Double> = listOf(dbMember.attack,dbMember.defence,dbMember.strength)
+        val graphicLen = 400.0
+        val offSetHeight = 420.0
+        val heights = listOf<Double>(0.0,42.0,83.0)
+        val biggestIndex = biggestDoubleAt(origin)
+        val biggestValue = origin[biggestIndex]
+        val lenClass = if ( biggestValue>0.0 && biggestValue<100.0 ){
+            100.0
+        }else{
+            0.0
+        }
+        val data:ArrayList<Pair<Double,Double>> = arrayListOf()
+        if (lenClass!=0.0){
+            val percentOfAll = listOf<Double>(origin[0]/lenClass,origin[1]/lenClass,origin[2]/lenClass)
+            for ((idx,percent) in percentOfAll.withIndex()){
+                if (percent>0.05){
+                    data.add(Pair(offSetHeight+heights[idx],percent*graphicLen))
+                }else{
+                    data.add(Pair(offSetHeight+heights[idx],0.0))
+                }
+            }
+            return data
+        }else{
+            for (idx in origin.indices){
+                data.add(Pair(offSetHeight+heights[idx],0.0))
+            }
+            return data
+        }
+    }
 }
