@@ -54,7 +54,7 @@ object ListenerOfItemSys:ListenerHost {
                             DBTools.deleteMemberItem(db,memberItem)
                         }
                     }else{
-                        e.group.sendMessage("${item.name}只能对自己使用哦")
+                        e.group.sendMessage("${item.name}不能能对自己使用哦")
                     }
                 }else{
                     e.group.sendMessage("你没有道具${itemName}")
@@ -82,7 +82,7 @@ object ListenerOfItemSys:ListenerHost {
                             DBTools.deleteMemberItem(db,memberItem)
                         }
                     }else{
-                        e.group.sendMessage("${item.name}只能对他人使用哦")
+                        e.group.sendMessage("${item.name}不能对他人使用哦")
                     }
                 }else{
                     e.group.sendMessage("你没有道具${itemName}")
@@ -149,6 +149,8 @@ object ListenerOfItemSys:ListenerHost {
             }
         }
     }
+
+
 
     // 道具系统行为
     private enum class Functions(cnName:String){

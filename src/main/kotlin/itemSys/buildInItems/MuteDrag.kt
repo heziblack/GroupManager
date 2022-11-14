@@ -14,7 +14,7 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 object MuteDrag:ItemEntity(
-    "禁言药水","可以让对象在一个小时之内无法说话的神秘道具，请勿对管理员使用",
+    "禁言药水","可以让对象在一个小时之内无法说话的神秘道具，只有群主有办法解开，请勿对管理员使用",
     inPrice = 800,
     useToStr = "【使用对象】在接下来的一个小时内不能说话了",
     canBuy = true,

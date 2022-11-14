@@ -11,6 +11,9 @@ object DBTools {
     private val defaultGroupID:Long
         get() = GroupmanagerHz.pluginConfig.group
 
+    val db:Database
+        get() = GroupmanagerHz.getDBC(GroupmanagerHz.pluginConfig.bot)
+
     /**获取群员在数据库中的数据对象
      * @return 数据对象, 若未找到返回空*/
     fun getMember(botID:Long, userID:Long, groupID:Long):Member?{
@@ -127,9 +130,9 @@ object DBTools {
         memberCost(db,-fraction,mem)
     }
 /**尝试添加新成员*/
-    fun addGroupMember(db: Database, mem:net.mamoe.mirai.contact.Member){
-        println(db.name+"添加成员")
-        transaction {
+    fun addGroupMember(mem:net.mamoe.mirai.contact.Member){
+        val db = GroupmanagerHz.getDBC(GroupmanagerHz.pluginConfig.bot)
+        transaction(db) {
             val q0 = Groups.select(Groups.number eq mem.group.id)
             val gid = if (q0.empty()){
                 val g = Group.new {
@@ -167,6 +170,7 @@ object DBTools {
             }
         }
     }
+
 
     fun memberBuyStock(db: Database,mem: net.mamoe.mirai.contact.Member,stockId:Int,num:Int):Boolean{
         val dbMember = getMember(db,mem.id,mem.group.id)?:return false
@@ -294,5 +298,66 @@ object DBTools {
         }
         return list
     }
+    fun fractionRank(dbMember:Member):Int{
+        dbMember.db
+        return transaction {
+            val q = Member.all().sortedByDescending { it.fraction }
+            var rank = -1
+            for ((idx,member) in q.withIndex()){
+                GroupmanagerHz.logger.info("$idx ${member.nickName}:${member.fraction}")
+                if (member.id == dbMember.id){
+                    rank = idx+1
+                    break
+                }
+            }
+            rank
+        }
+    }
+    /**获取数字属性*/
+    fun getNumericProp(dbMem: Member,propName:String,default:Double):MemberExProp{
+        dbMem.db
+         return transaction {
+            val q = MemberExProp.find {
+                (ExProps.mem eq dbMem.id) and (ExProps.exPropName eq propName)
+            }
+            if (q.empty()){
+                MemberExProp.new {
+                    member = dbMem
+                    exPropName = propName
+                    exPropValue = default
+                }
+            }else{
+                q.first()
+            }
+        }
+    }
+    /**判断成员是否今日签到*/
+    fun ifMemberSignIn(mem: net.mamoe.mirai.contact.Member):Boolean{
+        val db = GroupmanagerHz.getDBC(GroupmanagerHz.pluginConfig.bot)
+        return transaction {
+            val target = getMemberOrCreate(db,mem)
+            val q = MemberSignIn.find{
+                MemberSignIns.member eq target.id
+            }
+            if (q.empty()){
+                return@transaction false
+            }else{
+                val lastRow = q.last()
+                return@transaction lastRow.timeStamp.toLong()>GroupmanagerHz.todayLine()
+            }
+        }
 
+    }
+    /***/
+    fun memberSignIn(mem: net.mamoe.mirai.contact.Member){
+        transaction(db) {
+            if (!ifMemberSignIn(mem)){
+                val target = getMemberOrCreate(db,mem)
+                MemberSignIn.new {
+                    member = target
+                    timeStamp = GroupmanagerHz.todayStamp().toString()
+                }
+            }
+        }
+    }
 }

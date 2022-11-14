@@ -19,6 +19,7 @@ import java.awt.geom.RoundRectangle2D
 import java.awt.image.BufferedImage
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
+import java.text.DecimalFormat
 import javax.imageio.ImageIO
 
 object StatuesListener:ListenerHost {
@@ -46,6 +47,8 @@ object StatuesListener:ListenerHost {
             if (outMsg != "") {
                 e.group.sendMessage(outMsg)
             }
+        }else if (msg =="功能需求"){
+            e.group.sendMessage("https://docs.qq.com/form/page/DRGR1c2djZmpmWGF3")
         }
     }
 
@@ -66,12 +69,12 @@ object StatuesListener:ListenerHost {
     private fun userFraction(user: Member):String{
         val dbc = GroupmanagerHz.getDBC(user.bot.id)
         val dbMember = DBTools.getMember(dbc,user.id,user.group.id)?:return ""
-        return "您当前的积分为：${dbMember.fraction}"
+        val rank = DBTools.fractionRank(dbMember)
+        return "您当前的积分为：${dbMember.fraction}，排名：${rank}"
     }
 
     private fun characterCard(user: Member):BufferedImage?{
         val dbc = GroupmanagerHz.getDBC(user.bot.id)
-        val sb = StringBuilder()
         val dbMember = DBTools.getMember(dbc,user.id,user.group.id)?:return null
         val imgStream = GroupmanagerHz.getImageResStream("images/CharacterCardBase.jpg")?:return null
         val img = ImageIO.read(imgStream)
@@ -93,9 +96,7 @@ object StatuesListener:ListenerHost {
          * 2-宽度 */
         val rrtg:List<Pair<Double,Double>> = prepareProgressBar(dbMember)
         g2d.color = Color.LIGHT_GRAY
-        val colorsForPB:List<Color> = listOf(
-            Color(255,0,0), Color(0,0,255),Color(0,255,0)
-        )
+        val colorsForPB:List<Color> = listOf(Color(255,0,0), Color(0,0,255),Color(0,255,0))
         for ((idx,i) in rrtg.withIndex()){
             if (i.second!=0.0){
                 g2d.color = colorsForPB[idx]
@@ -109,10 +110,14 @@ object StatuesListener:ListenerHost {
         g2d.font = Font("华文隶书",Font.PLAIN,36)
         g2d.color = normalFontColor
         var ah = g2d.fontMetrics.ascent
-        g2d.drawString("${dbMember.fraction}",140,154+ah)
-        g2d.drawString("${dbMember.attack}",144,418+ah)
-        g2d.drawString("${dbMember.defence}",144,460+ah)
-        g2d.drawString("${dbMember.strength}",144,502+ah)
+        val dft = DecimalFormat.getInstance()
+        dft.maximumFractionDigits = 2
+        dft.minimumFractionDigits = 0
+        dft.format(dbMember.attack)
+        g2d.drawString("${dbMember.fraction} #${DBTools.fractionRank(dbMember)}",140,154+ah)
+        g2d.drawString(dft.format(dbMember.attack),144,418+ah)
+        g2d.drawString(dft.format(dbMember.defence),144,460+ah)
+        g2d.drawString(dft.format(dbMember.strength),144,502+ah)
 //        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,RenderingHints.VALUE_ANTIALIAS_ON)
         // 签到信息
         val signIn = transaction {
@@ -203,7 +208,9 @@ object StatuesListener:ListenerHost {
         }
         val data:ArrayList<Pair<Double,Double>> = arrayListOf()
         if (lenClass!=0.0){
-            val percentOfAll = listOf<Double>(origin[0]/lenClass,origin[1]/lenClass,origin[2]/lenClass)
+            val percentOfAll = listOf<Double>(
+                origin[0]/lenClass, origin[1]/lenClass, origin[2]/lenClass
+            )
             for ((idx,percent) in percentOfAll.withIndex()){
                 if (percent>0.05){
                     data.add(Pair(offSetHeight+heights[idx],percent*graphicLen))

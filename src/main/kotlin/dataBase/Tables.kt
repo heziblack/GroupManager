@@ -1,7 +1,9 @@
 package org.hezistudio.dataBase
 
+import org.jetbrains.exposed.dao.id.IdTable
 import org.jetbrains.exposed.dao.id.IntIdTable
 import org.jetbrains.exposed.dao.id.LongIdTable
+import org.jetbrains.exposed.sql.Table
 
 /**群表*/
 object Groups:IntIdTable(){
@@ -105,6 +107,13 @@ object TempProps:LongIdTable(){
     val stopTime = long("stop_time")
 }
 
+/**额外属性*/
+object ExProps:LongIdTable(){
+    val mem = reference("mem_id",GroupMembers)
+    val exPropName = varchar("ex_prop_name",72)
+    val exPropValue = double("ex_prop_value")
+}
+
 object MemberMutes:IntIdTable(){
     val member = reference("member_id",GroupMembers)
     val endTime = long("end_time")
@@ -122,4 +131,17 @@ object MemberFishings:IntIdTable(){
     val memId = integer("mem_id")
     val rodState = bool("rod_state")
     val targetTime = long("target_time")
+}
+
+object Stocks:IntIdTable(){
+    val stName = varchar("st_name",32)
+    val price = double("price")
+    val hold = long("player_hold")
+    val updateTime = long("update_time")
+    val trend = bool("trend")
+}
+object FishingDrops:IntIdTable(){
+    val dropName = varchar("drop_name",16)
+    val str = varchar("description_str",256)
+    val fraction = integer("frac_award")
 }

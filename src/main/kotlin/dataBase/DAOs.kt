@@ -126,3 +126,26 @@ class MemberFishing(id:EntityID<Int>):IntEntity(id){
     var rodState by MemberFishings.rodState.default(false)
     var targetTime by MemberFishings.targetTime.default(0)
 }
+
+class Stock(id:EntityID<Int>):IntEntity(id){
+    companion object:IntEntityClass<Stock>(Stocks)
+    var stName by Stocks.stName
+    var price by Stocks.price
+    var hold by Stocks.hold
+    var updateTime by Stocks.updateTime
+    var trend by Stocks.trend
+}
+
+class FishingDrop(id:EntityID<Int>):IntEntity(id){
+    companion object:IntEntityClass<FishingDrop>(FishingDrops)
+    var dropName by FishingDrops.dropName
+    var strDesc by FishingDrops.str
+    var awd by FishingDrops.fraction
+}
+
+class MemberExProp(id:EntityID<Long>):LongEntity(id){
+    companion object:LongEntityClass<MemberExProp>(ExProps)
+    var member by Member referencedOn ExProps.mem
+    var exPropName by ExProps.exPropName
+    var exPropValue by ExProps.exPropValue
+}

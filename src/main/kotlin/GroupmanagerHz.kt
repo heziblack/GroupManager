@@ -7,7 +7,6 @@ import net.mamoe.mirai.Bot
 import net.mamoe.mirai.console.extension.PluginComponentStorage
 import net.mamoe.mirai.console.plugin.jvm.JvmPluginDescription
 import net.mamoe.mirai.console.plugin.jvm.KotlinPlugin
-import net.mamoe.mirai.console.plugin.version
 import net.mamoe.mirai.contact.Group
 import net.mamoe.mirai.contact.MemberPermission
 import net.mamoe.mirai.contact.nameCardOrNick
@@ -28,7 +27,6 @@ import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.neq
 import org.jetbrains.exposed.sql.transactions.transaction
-import java.awt.image.BufferedImage
 import java.io.File
 import java.io.InputStream
 import java.time.Duration
@@ -36,14 +34,13 @@ import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import java.util.concurrent.Executors
-import javax.imageio.ImageIO
 import kotlin.math.absoluteValue
 
 object GroupmanagerHz : KotlinPlugin(
     JvmPluginDescription(
         id = "org.hezistudio.groupmanager-hz",
         name = "我的群管插件",
-        version = "0.0.5",
+        version = "0.1.3",
     ) {
         author("HeziBlack")
     }
@@ -63,6 +60,7 @@ object GroupmanagerHz : KotlinPlugin(
             }
         }
     }
+
     // 我的游戏群：795327860L
     // 测试群：116143851L
     private var groupID = 795327860L
@@ -84,7 +82,7 @@ object GroupmanagerHz : KotlinPlugin(
 
         // 哔哩哔哩解析
         channel.registerListenerHost(BiliVideoPhase)
-
+        channel.registerListenerHost(NaiTangChou)
         // 签到功能
         channel.filter {
             it is GroupMessageEvent && it.message.content == "签到"
@@ -382,16 +380,23 @@ object GroupmanagerHz : KotlinPlugin(
                 BlueMaps, BlueMapInputItems, BlueMapOutputItems,
                 GroupMembers, GroupMemberBlueMaps, MemberItems,
                 MemberSignIns, JiJians, ScheduleMembers,
-                GameSchedules,MemberMutes,MemberFishings
+                GameSchedules,MemberMutes,MemberFishings,Stocks,FishingDrops,
+                MemberStocks,ExProps
+            )
+            SchemaUtils.addMissingColumnsStatements(
+                Groups, Users, Items,
+                BlueMaps, BlueMapInputItems, BlueMapOutputItems,
+                GroupMembers, GroupMemberBlueMaps, MemberItems,
+                MemberSignIns, JiJians, ScheduleMembers,
+                GameSchedules,MemberMutes,MemberFishings,Stocks,FishingDrops,
+                MemberStocks,ExProps
             )
         }
     }
-
     /**启动时更新用户信息*/
     private fun updateDB(group:Group, file: File, db:Database? = null){
         db ?: Database.connect("jdbc:sqlite:${file.toURI()}","org.sqlite.JDBC")
         transaction {
-//            addLogger(StdOutSqlLogger)
             crateTables(this.db)
             val allItems = Item.all()
             for (item in BuildInItemList){

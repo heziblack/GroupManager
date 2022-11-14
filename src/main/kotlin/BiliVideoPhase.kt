@@ -1,18 +1,24 @@
 package org.hezistudio
 
 import com.beust.klaxon.Klaxon
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import net.mamoe.mirai.contact.Contact.Companion.sendImage
 import net.mamoe.mirai.event.EventHandler
 import net.mamoe.mirai.event.SimpleListenerHost
 import net.mamoe.mirai.event.events.GroupMessageEvent
 import net.mamoe.mirai.message.data.MessageChainBuilder
 import net.mamoe.mirai.message.data.content
 import net.mamoe.mirai.utils.ExternalResource.Companion.toExternalResource
+import net.mamoe.mirai.utils.ExternalResource.Companion.uploadAsImage
+import okhttp3.Request
 import org.hezistudio.GroupmanagerHz.logger
+import org.hezistudio.apexSearch.HttpClient
 import org.hezistudio.klaxonModels.MiniAppModel
 import java.awt.image.BufferedImage
-import java.io.File
-import java.net.HttpURLConnection
+import java.io.ByteArrayOutputStream
 import java.net.URL
+import java.util.*
 import javax.imageio.ImageIO
 
 object BiliVideoPhase:SimpleListenerHost() {
@@ -33,39 +39,24 @@ object BiliVideoPhase:SimpleListenerHost() {
             var img: BufferedImage? = null
             if (previewURL!=null){
                 // 根据URL 实例， 获取HttpURLConnection 实例
-                val url = URL( "http://" + previewURL )
-//                println(url)
-                val httpURLConnection: HttpURLConnection = url.openConnection() as HttpURLConnection
-                // 设置读取 和 连接 time out 时间
-                httpURLConnection.readTimeout = 2000
-                httpURLConnection.connectTimeout = 2000
-                // 获取图片输入流
-                val inputStream = httpURLConnection.inputStream
-                // 获取网络响应结果
-                val responseCode = httpURLConnection.responseCode
-                // 获取正常
-                if (responseCode == HttpURLConnection.HTTP_OK) {
-                    // 解析图片
-                    img = ImageIO.read(inputStream)
-                    inputStream.close()
+                val url = URL("http://$previewURL")
+                val imgGetter = ImageGetter(url.toString())
+                if (imgGetter.isOk){
+                    img = imgGetter.img
                 }
             }
             mb.add(tittle)
             if (img != null){
-                val folder = Plugin.dataFolder
-                val fileName = "cache"
-                val file =  File(folder,fileName)
-                if(!file.exists()) {
-                    val pf = file.parentFile
-                    if (!pf.exists()){
-                        pf.mkdirs()
-                    }
-                    file.createNewFile()
+                val os = ByteArrayOutputStream()
+                withContext(Dispatchers.IO) {
+                    ImageIO.write(img, "jpg", os)
                 }
-                ImageIO.write(img, "png", file)
-                val exf = file.toExternalResource("png")
-                val ii = e.group.uploadImage(exf)
-                mb.add(ii)
+                val er = os.toByteArray().toExternalResource()
+                val image = er.uploadAsImage(e.group)
+                withContext(Dispatchers.IO) {
+                    er.close()
+                }
+                mb.add(image)
             }
             val link = (videoURL?:"??").substringBefore("?")
             mb.add("链接：${link}")
@@ -73,6 +64,32 @@ object BiliVideoPhase:SimpleListenerHost() {
         }catch (e:Exception){
             logger.error("解析出错")
             logger.error(e.message)
+        }
+    }
+
+    class ImageGetter(
+        private val url:String
+    ):TimerTask(){
+        private var ok = false
+        val isOk
+            get() = ok
+
+        var img:BufferedImage? = null
+        init {
+            this.run()
+        }
+        override fun run() {
+            val request = Request.Builder().url(url).build()
+            val response = HttpClient.newCall(request).execute()
+            println(response.code)
+            if (response.code==200){
+                val body = response.body
+                if (body != null){
+                    val s = body.byteStream()
+                    img = ImageIO.read(s)
+                    ok = true
+                }
+            }
         }
     }
 }

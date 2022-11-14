@@ -40,6 +40,18 @@ object MenuListener:SimpleListenerHost() {
                每天早上自动播报，也可以通过“每日新闻”与“每日番剧”手动获取
             """.trimIndent(),
         """
+            ·钓鱼：
+               下杆：挥出鱼竿，等待鱼儿上钩
+               提杆：拉起鱼竿，查看收获
+        """.trimIndent(),
+        """
+            ·股票市场：
+               行情：查看今日股市
+               股票购买 [机构名称] [股票数量]：购买指定数量的股票
+               股票出售 [机构名称] [股票数量]：出售指定数量的股票
+               股票持有：查看自己当前持有的股票
+            """.trimIndent(),
+        """
             ·道具系统：
                道具商店：展示系统内可购买的道具
                使用 [道具名]：使用道具
@@ -49,7 +61,9 @@ object MenuListener:SimpleListenerHost() {
                出售 [道具名]：出售道具
                背包：查看背包物品
             （更多功能敬请期待 版本号:${GroupmanagerHz.version}）
-            """.trimIndent()
+            （需要功能请访问：https://docs.qq.com/sheet/DRG9UUmpEZ3N3TnpP 提交功能需求）
+            """.trimIndent(),
+
     )
 
     @EventHandler

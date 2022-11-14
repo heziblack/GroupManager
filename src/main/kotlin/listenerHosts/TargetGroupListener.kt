@@ -37,8 +37,9 @@ object TargetGroupListener:ListenerHost {
 
 /**成员加入更新数据库*/
     private fun memberJoinUpdateDB(member:Member){
-        val db = GroupmanagerHz.getDBC(member.bot.id)
-        DBTools.addGroupMember(db,member)
+        DBTools.getMemberOrCreate(GroupmanagerHz.getDBC(member.bot.id),member)
     }
+
+
 
 }

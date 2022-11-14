@@ -8,7 +8,7 @@ import org.hezistudio.itemSys.BuildInItemList
 
 object ListenerForItemDescription:ListenerHost {
     @EventHandler
-    suspend fun onE(e:GroupMessageEvent){
+    suspend fun onEvent(e:GroupMessageEvent){
         val dpt = BuildInItemList.get(e.message.content)?.description?:return
         e.group.sendMessage(dpt)
     }

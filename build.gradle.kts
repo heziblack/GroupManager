@@ -23,5 +23,4 @@ dependencies{
     implementation("org.jetbrains.exposed","exposed-jdbc","0.38.2")
     implementation ("com.beust:klaxon:5.5")
     implementation ("com.google.code.gson:gson:2.9.1")
-
 }
